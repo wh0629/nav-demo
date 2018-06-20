@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>17 进阶：第一个 JS 作品 键盘导航</title>
+    <style>
+        *{padding: 0;margin: 0;}
+        body{background: url("wall.jpg") no-repeat center;}
+        .wrapper{display: inline-block;text-align: center; padding: 10px;background: rgba(255,255,255,0.2);  border-radius: 10px;  }
+        main{text-align: center;display: flex;align-items: center;justify-content: center;height: 100vh;}
+        .key{  width: 47px;  height: 69px;  border-radius: 8px;  padding: 0 12px;  line-height: 69px;  display: inline-block; position: relative;  margin: 0 12px 12px 0;  background-color: #000;  color: #fff;  text-align: center;  font-family: keyboard, "Arial Rounded", Helvetica, Arial, sans-serif;  font-size: 24px;  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);  cursor: pointer;  }
+        .key:hover .btn{display: block;}
+        .btn{position: absolute;bottom: 5px;right: 5px;padding: 0;font-size: 12px;color: #333;display: none;}
+        .text{position: absolute;top: -15px;left: 10px;font-size: 30px;}
+        .img{width: 16px;height: 16px;position: absolute;bottom: 10px;left: 10px;}
+        #main > div:nth-child(2) {
+            margin-left: -50px;
+        }
+        #main > div:nth-child(3) {
+            margin-left: -127px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="main" class="wrapper"></div>
+    </main>
+</body>
+<script>
+    // 1、初始化数据
+    var hashA = init();
+    var keys = hashA['keys'];
+    var hash = hashA['hash'];
+
+    // 2、生成键盘
+    // 遍历 keys，生成 kbd 标签
+    generateKeyboard(keys,hash);
+
+    //3、监听用户动作
+    listenToUser(hash);
+
+
+    function init() {
+      var keys = {
+        '0':{0:'q',1:'w',2:'e',3:'r',4:'t',5:'y',6:'u',7:'i',8:'o',9:'p',length:10},
+        '1':{0:'a',1:'s',2:'d',3:'f',4:'g',5:'h',6:'j',7:'k',8:'l',length:9},
+        '2':{0:'z',1:'x',2:'c',3:'v',4:'b',5:'n',6:'m',length:7},
+        'length':3
+      }
+      var hash = {
+        'q':'qq.com',
+        'w':'weibo.com',
+        'e':'ele.me',
+        'r':'renren.com',
+        't':'tianya.com',
+        'y':'youtube.com',
+        'u':'uc.com',
+        'i':'iqiye.com',
+        'o':'opera.com',
+        'p':undefined,
+        'a':'acfun.tv',
+        's':'sohu.com',
+        'z':'zhihu.com',
+        'm':'www.mcdonalds.com.cn'
+      }
+      //取出localStorage中的new_hash对应的hash
+      var hashInLocalStorage = getFromLocalStorage('new_hash');
+      if(hashInLocalStorage){
+        hash = hashInLocalStorage
+      }
+
+      return{
+        "keys":keys,
+        "hash":hash
+      }
+    }
+
+
+    function generateKeyboard(keys,hash) {
+      for(var index=0;index<keys['length'];index++){
+        var div = tag('div');
+        div.className = 'row';
+        main.appendChild(div);
+        var row = keys[index];//第一个数组 第二个数组 第三个数组
+        for(var index2 = 0;index2<row['length'];index2++){
+          var kbd = tag('kbd');
+          kbd.className = 'key';
+          div.appendChild(kbd);
+
+          var span = tag('span');
+          span.textContent = row[index2];
+          span.className = "text";
+          kbd.appendChild(span);
+
+          var button = createButton(row[index2]);
+          kbd.appendChild(button);
+//
+          var img = createImage(hash[row[index2]]);
+          kbd.appendChild(img);
+        }
+      }
+    }
+
+
+    //工具函数
+    function getFromLocalStorage(name){
+      return JSON.parse(localStorage.getItem(name) || 'null')
+    }
+    function tag(tagName) {
+      return document.createElement(tagName);
+    }
+    function createButton(id) {
+      var button = tag('button');
+      button.textContent="编辑";
+      button.className = "btn";
+      button.id = id;
+      button.onclick = function (e) {
+        //e['target']就是用户点击的元素
+        var button2 = e['target'];
+        var key = button2['id'];
+        var img2 = button2.nextSibling;
+        console.log(img2);
+        var x = prompt('给我一个网址'); //qq.com
+        hash[key] = x;//hash变更
+        img2.src = 'http://'+ x + '/favicon.ico'
+        img2.onerror = function(bbb){
+          bbb.target.src = '//i.loli.net/2017/11/10/5a05afbc5e183.png'
+        }
+        localStorage.setItem('new_hash',JSON.stringify(hash));//把hash存入换存中，并命名为new_hash
+      }
+      return button;
+    }
+
+    function createImage(domain) {
+      var img = tag('img');
+      img.className='img';
+      if(domain){
+        img.src = 'http://'+ domain + '/favicon.ico'
+      }else{
+        img.src = '//i.loli.net/2017/11/10/5a05afbc5e183.png'
+      }
+      img.onerror = function (e) {
+        e.target.src = "//i.loli.net/2017/11/10/5a05afbc5e183.png"
+      }
+      return img;
+    }
+
+    function listenToUser(hash) {
+      document.onkeypress = function (aaa) {
+        var key = aaa['key'];
+        var website = hash[key];
+        console.log(website);
+        if(website){
+          window.open('http://'+website,'_blank');
+        }else{
+          alert("还没有添加哟，去编辑吧！")
+        }
+      }
+    }
+
+
+</script>
+</html>
